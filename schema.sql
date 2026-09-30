@@ -1,0 +1,3 @@
+-- Database schema has moved to supabase/schema.sql.
+-- Run that file in Supabase Dashboard > SQL Editor.
+-- This file is intentionally not a local PostgreSQL/SQLite schema.
