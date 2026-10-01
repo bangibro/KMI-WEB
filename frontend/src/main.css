@@ -433,7 +433,7 @@ tbody tr:hover { background: #f2fcf6; }
   50% { box-shadow: 0 0 0 8px rgba(54, 213, 197, 0); }
 }
 @keyframes progressFlow { to { background-position: -200% 0; } }
-@keyframes progressFill { 0%, 100% { opacity: .65; transform: scaleX(0); } 70% { opacity: 1; transform: scaleX(1); } }
+@keyframes progressFill { 0% { opacity: .65; transform: scaleX(0); } 68%, 100% { opacity: 1; transform: scaleX(1); } }
 @keyframes progressPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(54, 213, 197, .35), 0 4px 12px rgba(28, 54, 74, .08); }
   50% { box-shadow: 0 0 0 .5rem rgba(54, 213, 197, 0), 0 4px 16px rgba(28, 54, 74, .13); }
