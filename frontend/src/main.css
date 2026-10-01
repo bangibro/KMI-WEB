@@ -158,6 +158,8 @@ header.border-b .font-black {
 .toolbar-button:hover { border-color: #7ed5a5; background: #e5faed; box-shadow: 0 7px 16px rgba(28, 54, 74, .08); transform: translateY(-2px); }
 .toolbar-button-primary { color: #fff; border-color: transparent; background: linear-gradient(135deg, #23b58d, #258fc9); box-shadow: 0 8px 18px rgba(37, 143, 201, .18); }
 .toolbar-button-primary:hover { color: #fff; border-color: transparent; background: linear-gradient(135deg, #1ca47f, #207db1); }
+.toolbar-button-danger { color: #c74659; border-color: #f2c7ce; background: #fff5f6; }
+.toolbar-button-danger:hover { color: #a93649; border-color: #e99aa7; background: #ffe8eb; }
 
 /* Typography and cards */
 .panel {
