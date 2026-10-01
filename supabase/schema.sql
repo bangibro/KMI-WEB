@@ -7,6 +7,7 @@ create type public.app_role as enum ('super_admin','admin_bidang','pic_staff');
 
 create table public.divisions (
   id uuid primary key default gen_random_uuid(),
+  idempotency_key text not null unique,
   name text not null unique,
   description text,
   password_hash text,

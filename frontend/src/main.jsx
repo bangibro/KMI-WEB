@@ -100,10 +100,11 @@ function UserApp({ back, division }) {
 
 function RequestForm({ onCreated, division }) {
   const [form, setForm] = useState({ requester_name: '', division: division?.name || '', title: '', post_type: 'Feed', slide_count: 1, draft_url: '', deadline: '', description: '' })
-  const [error, setError] = useState('')
+  const [error, setError] = useState(''), [submitting, setSubmitting] = useState(false)
+  const idempotencyKey = useRef(crypto.randomUUID())
   const set = (key, value) => setForm({ ...form, [key]: value })
   return <section className="panel max-w-3xl"><div><p className="eyebrow">Request baru</p><h1 className="page-title">Request Postingan</h1><p className="muted">Isi kebutuhan konten dengan ringkas dan jelas.</p></div>
-    <form className="mt-7 grid gap-4 sm:grid-cols-2" onSubmit={async event => { event.preventDefault(); setError(''); try { const data = await api('/api/public/requests', { method: 'POST', body: JSON.stringify(form) }); await onCreated(data.public_token) } catch (e) { setError(e.message) } }}>
+    <form className="mt-7 grid gap-4 sm:grid-cols-2" onSubmit={async event => { event.preventDefault(); if (submitting) return; setSubmitting(true); setError(''); try { const data = await api('/api/public/requests', { method: 'POST', body: JSON.stringify({ ...form, idempotency_key: idempotencyKey.current }) }); await onCreated(data.public_token) } catch (e) { setError(e.message); setSubmitting(false) } }}>
       <Field label="Nama Pemohon" required value={form.requester_name} onChange={e => set('requester_name', e.target.value)} />
       <label className="field"><span>Bidang/Divisi</span><input value={form.division || 'Bidang belum dipilih'} readOnly className="bg-slate-50" /></label>
       <Field label="Judul/Nama Postingan" required value={form.title} onChange={e => set('title', e.target.value)} />
@@ -113,7 +114,7 @@ function RequestForm({ onCreated, division }) {
       <Field label="Link Draft/Referensi" type="url" required value={form.draft_url} onChange={e => set('draft_url', e.target.value)} />
       <label className="field sm:col-span-2"><span>Catatan/Keterangan</span><textarea value={form.description} onChange={e => set('description', e.target.value)} rows="4" /></label>
       {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
-      <button className="btn sm:col-span-2">Kirim Request</button>
+      <button className="btn sm:col-span-2" disabled={submitting}>{submitting ? 'Mengirim...' : 'Kirim Request'}</button>
     </form>
   </section>
 }
