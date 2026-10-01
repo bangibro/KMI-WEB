@@ -306,11 +306,11 @@ header.border-b .font-black {
 .progress-step:not(:last-child)::after { position: absolute; z-index: 0; top: 1rem; left: calc(50% + 1.2rem); right: calc(-50% + 1.2rem); height: .32rem; border: 1px solid #e8eef2; border-radius: 999px; background: #fff; box-shadow: inset 0 1px 2px rgba(28, 54, 74, .04); content: ''; }
 .progress-step.is-past:not(:last-child)::after { border-color: #42b9ee; background: #42b9ee; }
 .progress-step.is-current:not(:last-child)::before { position: absolute; z-index: 1; top: .93rem; left: calc(50% + 1.2rem); right: calc(-50% + 1.2rem); height: .46rem; border-radius: 999px; background: linear-gradient(90deg, #36d5c5, #42b9ee); content: ''; transform: scaleX(0); transform-origin: left center; animation: progressFill 2.2s ease-in-out infinite; }
-.progress-node { position: relative; z-index: 2; display: grid; width: max-content; grid-template-columns: 2.1rem auto; align-items: center; gap: .55rem; }
+.progress-node { position: relative; z-index: 2; display: grid; width: 2.1rem; }
 .progress-marker { position: relative; z-index: 1; display: grid; width: 2.1rem; height: 2.1rem; grid-column: 1; place-items: center; color: #8c9aaa; border: .28rem solid #edf2f5; border-radius: 50%; background: #fff; font-size: .72rem; font-weight: 900; box-shadow: 0 4px 12px rgba(28, 54, 74, .08); }
 .progress-step.is-complete .progress-marker { color: #fff; border-color: #d5faf0; background: linear-gradient(135deg, #36d5c5, #42b9ee); }
 .progress-step.is-current .progress-marker { animation: progressPulse 1.8s ease-in-out infinite; }
-.progress-label { display: grid; grid-column: 2; gap: .2rem; margin: 0; text-align: left; }
+.progress-label { display: grid; gap: .2rem; margin-top: .6rem; text-align: center; }
 .progress-label b { color: #8190a0; font-size: .73rem; }
 .progress-label small { color: #a3afbb; font-size: .63rem; font-weight: 700; }
 .progress-step.is-complete .progress-label b { color: #087e81; }
@@ -393,7 +393,7 @@ tbody tr:hover { background: #f2fcf6; }
   table { min-width: 860px; }
   .progress-line { overflow-x: auto; justify-content: flex-start; padding-right: 0; padding-left: 0; }
   .progress-step { min-width: 7.5rem; }
-  .progress-node { gap: .4rem; }
+  .progress-node { width: 2.1rem; }
 }
 
 /* Light-cyan motion layer */
