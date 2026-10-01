@@ -624,6 +624,8 @@ header.border-b .font-black { letter-spacing: -.045em; }
 .status { box-shadow: 0 4px 12px rgba(32, 184, 154, .08); }
 table { font-size: .8rem; }
 th { padding-top: 1.1rem; padding-bottom: 1.1rem; color: #69828a; background: #f6faf9; }
+.table-sort { color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; }
+.table-sort:hover { color: var(--green-dark); }
 td { padding-top: 1.05rem; padding-bottom: 1.05rem; }
 tbody tr:hover { background: #f1faf6; }
 .home-page {
