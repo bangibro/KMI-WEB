@@ -34,7 +34,8 @@ begin
 
   if selected_pic is null then
     current_cycle := current_cycle + 1;
-    delete from public.pic_rotation;
+    delete from public.pic_rotation
+    where true;
     select candidate into selected_pic from unnest(names) as candidate order by random() limit 1;
   end if;
 
