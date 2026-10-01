@@ -254,6 +254,8 @@ header.border-b .font-black {
 .notification-item.unread { border-color: #a9e8e4; background: #f2fdfd; }
 .notification-item b { color: var(--ink-soft); font-size: .88rem; }
 .notification-item p { margin: .3rem 0 0; color: var(--muted); font-size: .75rem; }
+.notification-delete { flex: 0 0 auto; color: #c74659; border: 0; background: transparent; font-size: 1.35rem; line-height: 1; opacity: .65; }
+.notification-delete:hover { opacity: 1; transform: scale(1.1); }
 .status {
   display: inline-flex;
   padding: .4rem .7rem;

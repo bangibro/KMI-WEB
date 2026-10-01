@@ -1,9 +1,11 @@
 const { spawn } = require('child_process')
 
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+const npmCommand = process.platform === 'win32' ? (process.env.npm_execpath ? process.execPath : 'npm.cmd') : 'npm'
+const npmArgs = process.env.npm_execpath ? [process.env.npm_execpath] : []
+const spawnOptions = { stdio: 'inherit', env: process.env }
 const processes = [
-  spawn(npmCommand, ['run', 'start'], { stdio: 'inherit', env: process.env }),
-  spawn(npmCommand, ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', env: process.env })
+  spawn(npmCommand, [...npmArgs, 'run', 'start'], spawnOptions),
+  spawn(npmCommand, [...npmArgs, '--prefix', 'frontend', 'run', 'dev'], spawnOptions)
 ]
 
 let stopping = false

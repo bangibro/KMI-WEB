@@ -212,6 +212,7 @@ function AdminDetail({ request, onClose, onSaved }) {
 
 function NotificationPage({ audience, division, items, onChange }) {
   const [storedItems, setStoredItems] = useState(() => getNotifications())
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null)
   useEffect(() => {
     const latest = getNotifications()
     setStoredItems(latest)
@@ -225,19 +226,27 @@ function NotificationPage({ audience, division, items, onChange }) {
     setStoredItems(updated)
     onChange(updated)
   }
-  return <section><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Pusat informasi</p><h1 className="page-title">Notifikasi</h1><p className="muted">Informasi terbaru terkait request dan aktivitas aplikasi.</p></div>{visible.some(item => !item.read) && <button className="btn-secondary" onClick={markAllRead}>Tandai semua dibaca</button>}</div><div className="mt-7 grid gap-3">{visible.length ? visible.map(item => <article className={`notification-item ${item.read ? '' : 'unread'}`} key={item.id}><span className="toast-icon">{item.read ? '✓' : '•'}</span><div><b>{item.message}</b><p>{new Date(item.created_at).toLocaleString('id-ID')}</p></div></article>) : <div className="panel text-sm text-slate-500">Belum ada notifikasi.</div>}</div></section>
+  const removeNotification = () => {
+    const updated = sourceItems.filter(item => item.id !== deleteConfirmation.id)
+    localStorage.setItem(notificationsKey, JSON.stringify(updated))
+    setStoredItems(updated)
+    onChange(updated)
+    setDeleteConfirmation(null)
+  }
+  return <section><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Pusat informasi</p><h1 className="page-title">Notifikasi</h1><p className="muted">Informasi terbaru terkait request dan aktivitas aplikasi.</p></div>{visible.some(item => !item.read) && <button className="btn-secondary" onClick={markAllRead}>Tandai semua dibaca</button>}</div><div className="mt-7 grid gap-3">{visible.length ? visible.map(item => <article className={`notification-item ${item.read ? '' : 'unread'}`} key={item.id}><span className="toast-icon">{item.read ? '✓' : '•'}</span><div className="min-w-0 flex-1"><b>{item.message}</b><p>{new Date(item.created_at).toLocaleString('id-ID')}</p></div><button type="button" className="notification-delete" aria-label="Hapus notifikasi" onClick={() => setDeleteConfirmation(item)}>×</button></article>) : <div className="panel text-sm text-slate-500">Belum ada notifikasi.</div>}</div>{deleteConfirmation && <ConfirmModal confirmation={{ action: 'remove-notification', request: { title: deleteConfirmation.message } }} onCancel={() => setDeleteConfirmation(null)} onConfirm={removeNotification} />}</section>
 }
 function ConfirmModal({ confirmation, onCancel, onConfirm }) {
   const isDelete = confirmation.action === 'remove'
+  const isNotificationDelete = confirmation.action === 'remove-notification'
   const isSubmit = confirmation.action === 'submit'
   const isBulkDelete = confirmation.action === 'remove-all'
   return <div className="confirm-modal" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onCancel() }}>
     <section className="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-      <div className={`confirm-icon ${isDelete || isBulkDelete ? 'confirm-icon-danger' : ''}`} aria-hidden="true">{isDelete || isBulkDelete ? '!' : isSubmit ? '✓' : '↗'}</div>
-      <p className="confirm-eyebrow">{isDelete || isBulkDelete ? 'Tindakan permanen' : isSubmit ? 'Periksa kembali' : 'Pindahkan request'}</p>
-      <h2 id="confirm-title">{isDelete ? 'Hapus request ini?' : isBulkDelete ? 'Hapus semua arsip?' : isSubmit ? 'Kirim request sekarang?' : 'Arsipkan request ini?'}</h2>
-      <p className="confirm-copy"><b>{confirmation.request.title || 'Request ini'}</b>{isDelete || isBulkDelete ? ' akan dihapus permanen dan tidak dapat dipulihkan.' : isSubmit ? ' tidak dapat diedit lagi setelah dikirim. Pastikan semua isian sudah benar sebelum melanjutkan.' : ' akan dipindahkan ke arsip dan tidak tampil di request aktif.'}</p>
-      <div className="confirm-actions"><button type="button" className="btn-secondary" onClick={onCancel}>{isSubmit ? 'Periksa lagi' : 'Batal'}</button><button type="button" className={`confirm-submit ${isDelete || isBulkDelete ? 'confirm-submit-danger' : ''}`} onClick={onConfirm}>{isDelete || isBulkDelete ? 'Ya, hapus permanen' : isSubmit ? 'Ya, kirim request' : 'Ya, arsipkan'}</button></div>
+      <div className={`confirm-icon ${isDelete || isBulkDelete || isNotificationDelete ? 'confirm-icon-danger' : ''}`} aria-hidden="true">{isDelete || isBulkDelete || isNotificationDelete ? '!' : isSubmit ? '✓' : '↗'}</div>
+      <p className="confirm-eyebrow">{isDelete || isBulkDelete || isNotificationDelete ? 'Tindakan permanen' : isSubmit ? 'Periksa kembali' : 'Pindahkan request'}</p>
+      <h2 id="confirm-title">{isDelete ? 'Hapus request ini?' : isBulkDelete ? 'Hapus semua arsip?' : isNotificationDelete ? 'Hapus notifikasi ini?' : isSubmit ? 'Kirim request sekarang?' : 'Arsipkan request ini?'}</h2>
+      <p className="confirm-copy"><b>{confirmation.request.title || 'Request ini'}</b>{isDelete || isBulkDelete || isNotificationDelete ? ' akan dihapus permanen dan tidak dapat dipulihkan.' : isSubmit ? ' tidak dapat diedit lagi setelah dikirim. Pastikan semua isian sudah benar sebelum melanjutkan.' : ' akan dipindahkan ke arsip dan tidak tampil di request aktif.'}</p>
+      <div className="confirm-actions"><button type="button" className="btn-secondary" onClick={onCancel}>{isSubmit ? 'Periksa lagi' : 'Batal'}</button><button type="button" className={`confirm-submit ${isDelete || isBulkDelete || isNotificationDelete ? 'confirm-submit-danger' : ''}`} onClick={onConfirm}>{isDelete || isBulkDelete || isNotificationDelete ? 'Ya, hapus permanen' : isSubmit ? 'Ya, kirim request' : 'Ya, arsipkan'}</button></div>
     </section>
   </div>
 }
