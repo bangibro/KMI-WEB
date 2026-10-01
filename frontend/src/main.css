@@ -256,6 +256,8 @@ header.border-b .font-black {
 .notification-item p { margin: .3rem 0 0; color: var(--muted); font-size: .75rem; }
 .notification-delete { flex: 0 0 auto; color: #c74659; border: 0; background: transparent; font-size: 1.35rem; line-height: 1; opacity: .65; }
 .notification-delete:hover { opacity: 1; transform: scale(1.1); }
+.notification-clear-all { padding: .65rem .9rem; color: #c74659; border: 1px solid #f2c7ce; border-radius: .75rem; background: #fff5f6; font-size: .78rem; font-weight: 800; }
+.notification-clear-all:hover { color: #a93649; border-color: #e99aa7; background: #ffe8eb; }
 .status {
   display: inline-flex;
   padding: .4rem .7rem;
