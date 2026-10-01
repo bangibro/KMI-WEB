@@ -31,4 +31,5 @@ app.post('/api/admin/requests/:id/archive',requireAdmin,wrap(async(req,res)=>{co
 app.delete('/api/admin/requests/:id',requireAdmin,wrap(async(req,res)=>{const {data:current,error:readError}=await db.from('requests').select('id,status,division').eq('id',req.params.id).single();if(readError||!current)return bad(res,'Request tidak ditemukan',404);if(current.status!=='Selesai')return bad(res,'Hanya request Selesai yang dapat dihapus');if(req.admin.role==='admin_bidang'&&current.division!==req.admin.division)return bad(res,'Request bukan bidang Anda',403);const {error}=await db.from('requests').delete().eq('id',current.id);if(error)throw error;res.json({ok:true})}));
 app.use((error,req,res,next)=>{console.error(error);bad(res,error.message||'Terjadi kesalahan server',500)});
 if(!process.env.SUPABASE_URL||!process.env.SUPABASE_ANON_KEY||!process.env.SUPABASE_SERVICE_ROLE_KEY)throw new Error('SUPABASE_URL, SUPABASE_ANON_KEY, dan SUPABASE_SERVICE_ROLE_KEY wajib diisi');
-app.listen(process.env.PORT||4001,()=>console.log(`API berjalan di port ${process.env.PORT||4001}`));
+if(require.main===module){const port=process.env.PORT||4001;app.listen(port,'0.0.0.0',()=>console.log(`API berjalan di port ${port}`))}
+module.exports=app;

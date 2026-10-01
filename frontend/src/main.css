@@ -471,3 +471,108 @@ main.mx-auto { padding-top: 2.25rem; padding-bottom: 3.5rem; }
   .art-back { width: 10.5rem; top: 12%; }.art-calendar i { height: 1.5rem; }
   .art-floating { right: 5%; bottom: 9%; }
 }
+
+/* Refined visual system */
+:root {
+  --ink: #172b3a;
+  --ink-soft: #385163;
+  --muted: #738692;
+  --line: #e2eceb;
+  --canvas: #f3f8f7;
+  --surface: #ffffff;
+  --green: #20b89a;
+  --green-dark: #087e73;
+  --blue: #4a9fcb;
+  --navy: #153747;
+  --shadow-sm: 0 10px 30px rgba(22, 67, 72, .065);
+  --shadow-md: 0 24px 60px rgba(22, 67, 72, .12);
+}
+body { background: #f3f8f7; }
+.bg-slate-50, .bg-slate-950:not(.home-page) {
+  background:
+    radial-gradient(ellipse at 4% 0%, rgba(96, 213, 181, .11), transparent 32rem),
+    radial-gradient(ellipse at 100% 18%, rgba(102, 174, 218, .09), transparent 30rem),
+    #f3f8f7 !important;
+}
+header.border-b {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  border-bottom: 1px solid rgba(215, 231, 228, .85) !important;
+  background: rgba(250, 253, 252, .84) !important;
+  box-shadow: 0 8px 28px rgba(24, 67, 75, .045);
+}
+header.border-b > div { min-height: 5rem; }
+header.border-b .font-black { letter-spacing: -.045em; }
+.nav-link { transition: color .2s, background .2s, border-color .2s, transform .2s; }
+.nav-link:hover { transform: translateY(-1px); }
+.nav-link.active { box-shadow: inset 0 0 0 1px rgba(32, 184, 154, .08); }
+.panel {
+  border-color: rgba(218, 232, 229, .9);
+  border-radius: 1.35rem;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 16px 44px rgba(24, 67, 75, .07);
+}
+.page-title { letter-spacing: -.065em; line-height: 1.08; }
+.eyebrow { letter-spacing: .2em; }
+.field input, .field select, .field textarea, .field-input {
+  border-color: #dce8e6;
+  border-radius: .9rem;
+  background-color: #fbfdfc;
+}
+.field input:focus, .field select:focus, .field textarea:focus, .field-input:focus {
+  border-color: #39c6a5;
+  box-shadow: 0 0 0 4px rgba(32, 184, 154, .13), 0 5px 16px rgba(32, 184, 154, .06);
+}
+.btn {
+  background: linear-gradient(115deg, #18aa89 0%, #2bc3a2 52%, #4badd0 100%);
+  box-shadow: 0 11px 24px rgba(27, 174, 145, .23);
+}
+.btn:hover { filter: saturate(1.08); box-shadow: 0 15px 30px rgba(27, 174, 145, .3); }
+.btn-secondary, .toolbar-button { border-color: #d2e9e2; background: #f0faf6; }
+.toolbar-button-primary { background: linear-gradient(115deg, #18aa89, #4badd0); }
+.stat {
+  position: relative;
+  overflow: hidden;
+  border-color: #e1ece9;
+  border-radius: 1.1rem;
+  background: linear-gradient(145deg, #fff 35%, #f4fbf8);
+}
+.stat::after {
+  position: absolute;
+  right: -1.3rem;
+  bottom: -2.1rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border: 1px solid rgba(32, 184, 154, .1);
+  border-radius: 50%;
+  content: '';
+}
+.stat b { font-size: 1.85rem; letter-spacing: -.06em; }
+.status { box-shadow: 0 4px 12px rgba(32, 184, 154, .08); }
+table { font-size: .8rem; }
+th { padding-top: 1.1rem; padding-bottom: 1.1rem; color: #69828a; background: #f6faf9; }
+td { padding-top: 1.05rem; padding-bottom: 1.05rem; }
+tbody tr:hover { background: #f1faf6; }
+.home-page {
+  background:
+    radial-gradient(ellipse at 77% 43%, rgba(63, 198, 162, .14), transparent 31rem),
+    radial-gradient(ellipse at 5% 100%, rgba(91, 162, 199, .09), transparent 29rem),
+    #f7faf9 !important;
+}
+.home-title span { background: linear-gradient(100deg, #159c83, #39b994 55%, #539fc2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.home-art {
+  border-color: rgba(189, 222, 213, .8);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,.9), transparent 47%),
+    linear-gradient(145deg, #e3f4ed, #edf6f4 52%, #e4f0f4);
+  box-shadow: 0 28px 80px rgba(37, 103, 96, .1);
+}
+.art-cover { background: radial-gradient(circle at 74% 17%, rgba(255,255,255,.52), transparent 20%), linear-gradient(145deg, #145a65, #15a887 62%, #9cdbbd); }
+.choice-card { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s, border-color .25s; }
+.choice-card:hover { transform: translateY(-5px); }
+.toast { border-color: #cde9e2; }
+@media (max-width: 640px) {
+  header.border-b { position: relative; }
+  .home-title { font-size: clamp(2.75rem, 13vw, 4rem); }
+}
