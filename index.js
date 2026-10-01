@@ -11,7 +11,7 @@ async function addLog(requestId,actorId,action,oldValue,newValue){const {error}=
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function assignPic(requestId){for(let attempt=0;attempt<3;attempt++){const {data,error}=await db.rpc('assign_random_pic',{request_id:requestId});if(!error)return data;const transient=/fetch failed|timeout|ECONNRESET|ECONNREFUSED|connect/i.test(`${error.message||''} ${error.details||''}`);if(!transient||attempt===2){if(transient)throw new Error('Supabase tidak dapat dihubungi saat menentukan PIC. Periksa koneksi internet lalu coba lagi.');throw error}await wait(500*(attempt+1))}}
 async function requestRows(query){const {data,error}=await query.order('created_at',{ascending:false});if(error)throw error;return (data||[]).map(r=>({...r,assigned_to:r.assigned_to||null}))}
-async function purgeExpiredArchives(){const cutoff=new Date(Date.now()-30*24*60*60*1000).toISOString();const {error}=await db.from('requests').delete().not('archived_at','is',null).lt('archived_at',cutoff);if(error)throw error}
+async function purgeExpiredArchives(){const cutoff=new Date(Date.now()-30*24*60*60*1000).toISOString();const {data, error:readError}=await db.from('requests').select('id').not('archived_at','is',null).lt('archived_at',cutoff);if(readError)throw readError;for(const request of data||[]){const {error}=await db.from('requests').delete().eq('id',request.id);if(error)throw error}}
 app.use(cors(),express.json(),express.static(path.join(__dirname,'frontend','dist')));
 purgeExpiredArchives().catch(error=>console.error('Gagal membersihkan arsip kadaluarsa:',error));
 setInterval(() => purgeExpiredArchives().catch(error=>console.error('Gagal membersihkan arsip kadaluarsa:',error)), 24*60*60*1000);
