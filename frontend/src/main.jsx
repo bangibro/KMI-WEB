@@ -8,6 +8,7 @@ const statuses = ['Menunggu', 'Diproses', 'Selesai']
 const media = value => value?.startsWith('/') ? API + value : value
 const notificationsKey = 'kmi_notifications'
 const authStorage = window.sessionStorage
+const formatDate = value => value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString('id-ID') : '-'
 function getNotifications() { try { return JSON.parse(localStorage.getItem(notificationsKey) || '[]') } catch { return [] } }
 function addNotification(message, audience = 'all', division = null) {
   const items = getNotifications()
@@ -100,22 +101,28 @@ function UserApp({ back, division }) {
 
 function RequestForm({ onCreated, division }) {
   const [form, setForm] = useState({ requester_name: '', division: division?.name || '', title: '', post_type: 'Feed', slide_count: 1, draft_url: '', deadline: '', description: '' })
-  const [error, setError] = useState(''), [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(''), [submitting, setSubmitting] = useState(false), [confirmation, setConfirmation] = useState(false)
   const idempotencyKey = useRef(crypto.randomUUID())
   const set = (key, value) => setForm({ ...form, [key]: value })
+  const submit = async () => {
+    setConfirmation(false); setSubmitting(true); setError('')
+    try { const data = await api('/api/public/requests', { method: 'POST', body: JSON.stringify({ ...form, idempotency_key: idempotencyKey.current }) }); await onCreated(data.public_token) }
+    catch (e) { setError(e.message); setSubmitting(false) }
+  }
   return <section className="panel max-w-3xl"><div><p className="eyebrow">Request baru</p><h1 className="page-title">Request Postingan</h1><p className="muted">Isi kebutuhan konten dengan ringkas dan jelas.</p></div>
-    <form className="mt-7 grid gap-4 sm:grid-cols-2" onSubmit={async event => { event.preventDefault(); if (submitting) return; setSubmitting(true); setError(''); try { const data = await api('/api/public/requests', { method: 'POST', body: JSON.stringify({ ...form, idempotency_key: idempotencyKey.current }) }); await onCreated(data.public_token) } catch (e) { setError(e.message); setSubmitting(false) } }}>
+    <form className="mt-7 grid gap-4 sm:grid-cols-2" onSubmit={event => { event.preventDefault(); if (!submitting) setConfirmation(true) }}>
       <Field label="Nama Pemohon" required value={form.requester_name} onChange={e => set('requester_name', e.target.value)} />
       <label className="field"><span>Bidang/Divisi</span><input value={form.division || 'Bidang belum dipilih'} readOnly className="bg-slate-50" /></label>
       <Field label="Judul/Nama Postingan" required value={form.title} onChange={e => set('title', e.target.value)} />
       <label className="field"><span>Jenis Postingan</span><select value={form.post_type} onChange={e => set('post_type', e.target.value)}>{['Feed', 'Story', 'Reels'].map(x => <option key={x}>{x}</option>)}</select></label>
       <Field label="Jumlah Slide" type="number" min="1" required value={form.slide_count} onChange={e => set('slide_count', e.target.value)} />
-      <Field label="Deadline" type="datetime-local" required value={form.deadline} onChange={e => set('deadline', e.target.value)} />
+      <Field label="Deadline" type="date" required value={form.deadline} onChange={e => set('deadline', e.target.value)} />
       <Field label="Link Draft/Referensi" type="url" required value={form.draft_url} onChange={e => set('draft_url', e.target.value)} />
       <label className="field sm:col-span-2"><span>Catatan/Keterangan</span><textarea value={form.description} onChange={e => set('description', e.target.value)} rows="4" /></label>
       {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
       <button className="btn sm:col-span-2" disabled={submitting}>{submitting ? 'Mengirim...' : 'Kirim Request'}</button>
     </form>
+    {confirmation && <ConfirmModal confirmation={{ action: 'submit', request: form }} onCancel={() => setConfirmation(false)} onConfirm={submit} />}
   </section>
 }
 
@@ -126,7 +133,7 @@ function RequestLanding({ onNewRequest }) {
 function Progress({ requests, loading, onRefresh, onNewRequest }) {
   const header = <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Pantauan Anda</p><h1 className="page-title">Progress Postingan</h1><p className="muted">Request yang tersimpan di browser ini.</p></div><button className="btn-secondary" onClick={onRefresh} disabled={loading}>{loading ? 'Memuat...' : 'Refresh'}</button></div>
   if (!requests.length) return <section>{header}<div className="panel mt-7 text-sm text-slate-500">Belum ada request. Klik tombol <b>+ Request Postingan</b> untuk mulai.</div><button className="btn mt-5" onClick={onNewRequest}>+ Request Postingan</button></section>
-  return <section>{header}<div className="mt-7 grid gap-4">{requests.map(request => { const currentStep = statuses.indexOf(request.status); return <article className="panel" key={request.id}><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{request.title}</h2><p className="muted">{request.requester_name} · {request.division}</p></div><span className="status">{request.status}</span></div><div className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-5"><p><b>Tanggal Request</b><br />{new Date(request.created_at).toLocaleString('id-ID')}</p><p><b>Deadline</b><br />{new Date(request.deadline).toLocaleString('id-ID')}</p><p><b>Jenis</b><br />{request.post_type}</p><p><b>PIC</b><br />{request.assigned_to || 'Belum ditentukan'}</p><p><b>Catatan Admin</b><br />{request.admin_note || '-'}</p></div>{request.result_url && <a className="mt-5 inline-block text-sm font-bold text-orange-600 underline" href={request.result_url} target="_blank">Buka link hasil postingan</a>}<div className="progress-line" aria-label={`Progress request: ${request.status}`}>{statuses.map((status, index) => <div className={`progress-step ${index <= currentStep ? 'is-complete' : ''} ${index === currentStep ? 'is-current' : ''} ${index < currentStep ? 'is-past' : ''}`} key={status}><div className="progress-node"><div className="progress-marker">{index < currentStep ? '✓' : index + 1}</div></div><div className="progress-label"><b>{status}</b><small>{index < currentStep ? 'Selesai' : index === currentStep ? 'Sedang berjalan' : 'Menunggu'}</small></div></div>)}</div></article> })}</div></section>
+  return <section>{header}<div className="mt-7 grid gap-4">{requests.map(request => { const currentStep = statuses.indexOf(request.status); return <article className="panel" key={request.id}><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{request.title}</h2><p className="muted">{request.requester_name} · {request.division}</p></div><span className="status">{request.status}</span></div><div className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-5"><p><b>Tanggal Request</b><br />{new Date(request.created_at).toLocaleString('id-ID')}</p><p><b>Deadline</b><br />{formatDate(request.deadline)}</p><p><b>Jenis</b><br />{request.post_type}</p><p><b>PIC</b><br />{request.assigned_to || 'Belum ditentukan'}</p><p><b>Catatan Admin</b><br />{request.admin_note || '-'}</p></div>{request.result_url && <a className="mt-5 inline-block text-sm font-bold text-orange-600 underline" href={request.result_url} target="_blank">Buka link hasil postingan</a>}<div className="progress-line" aria-label={`Progress request: ${request.status}`}>{statuses.map((status, index) => <div className={`progress-step ${index <= currentStep ? 'is-complete' : ''} ${index === currentStep ? 'is-current' : ''} ${index < currentStep ? 'is-past' : ''}`} key={status}><div className="progress-node"><div className="progress-marker">{index < currentStep ? '✓' : index + 1}</div></div><div className="progress-label"><b>{status}</b><small>{index < currentStep ? 'Selesai' : index === currentStep ? 'Sedang berjalan' : 'Menunggu'}</small></div></div>)}</div></article> })}</div></section>
 }
 
 function AdminApp({ back }) {
@@ -216,13 +223,14 @@ function NotificationPage({ audience, division, items, onChange }) {
 }
 function ConfirmModal({ confirmation, onCancel, onConfirm }) {
   const isDelete = confirmation.action === 'remove'
+  const isSubmit = confirmation.action === 'submit'
   return <div className="confirm-modal" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onCancel() }}>
     <section className="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-      <div className={`confirm-icon ${isDelete ? 'confirm-icon-danger' : ''}`} aria-hidden="true">{isDelete ? '!' : '↗'}</div>
-      <p className="confirm-eyebrow">{isDelete ? 'Tindakan permanen' : 'Pindahkan request'}</p>
-      <h2 id="confirm-title">{isDelete ? 'Hapus request ini?' : 'Arsipkan request ini?'}</h2>
-      <p className="confirm-copy"><b>{confirmation.request.title}</b>{isDelete ? ' akan dihapus permanen dan tidak dapat dipulihkan.' : ' akan dipindahkan ke arsip dan tidak tampil di request aktif.'}</p>
-      <div className="confirm-actions"><button type="button" className="btn-secondary" onClick={onCancel}>Batal</button><button type="button" className={`confirm-submit ${isDelete ? 'confirm-submit-danger' : ''}`} onClick={onConfirm}>{isDelete ? 'Ya, hapus' : 'Ya, arsipkan'}</button></div>
+      <div className={`confirm-icon ${isDelete ? 'confirm-icon-danger' : ''}`} aria-hidden="true">{isDelete ? '!' : isSubmit ? '✓' : '↗'}</div>
+      <p className="confirm-eyebrow">{isDelete ? 'Tindakan permanen' : isSubmit ? 'Periksa kembali' : 'Pindahkan request'}</p>
+      <h2 id="confirm-title">{isDelete ? 'Hapus request ini?' : isSubmit ? 'Kirim request sekarang?' : 'Arsipkan request ini?'}</h2>
+      <p className="confirm-copy"><b>{confirmation.request.title || 'Request ini'}</b>{isDelete ? ' akan dihapus permanen dan tidak dapat dipulihkan.' : isSubmit ? ' tidak dapat diedit lagi setelah dikirim. Pastikan semua isian sudah benar sebelum melanjutkan.' : ' akan dipindahkan ke arsip dan tidak tampil di request aktif.'}</p>
+      <div className="confirm-actions"><button type="button" className="btn-secondary" onClick={onCancel}>Periksa lagi</button><button type="button" className={`confirm-submit ${isDelete ? 'confirm-submit-danger' : ''}`} onClick={onConfirm}>{isDelete ? 'Ya, hapus' : isSubmit ? 'Ya, kirim request' : 'Ya, arsipkan'}</button></div>
     </section>
   </div>
 }
