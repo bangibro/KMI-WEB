@@ -1,6 +1,4 @@
--- Jalankan sekali di Supabase Dashboard > SQL Editor.
--- Request yang berstatus Selesai otomatis masuk arsip.
-
+-- Request yang keluar dari status Selesai harus kembali ke daftar aktif.
 create or replace function public.archive_completed_request()
 returns trigger
 language plpgsql

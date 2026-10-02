@@ -48,6 +48,13 @@ create table public.pic_rotation (
   cycle integer not null default 1,
   assigned_at timestamptz not null default now()
 );
+create table public.pic_members (
+  name text primary key,
+  created_at timestamptz not null default now()
+);
+insert into public.pic_members(name)
+select name from unnest(array['Reza','Sindhu','Farid','Evelyn','Ibro','Rozzan','Mukti','Fayza']) as name
+on conflict (name) do nothing;
 create table public.activity_logs (
   id uuid primary key default gen_random_uuid(),
   request_id uuid not null references public.requests(id) on delete cascade,
@@ -79,3 +86,14 @@ begin insert into public.profiles(id,name,email) values(new.id,coalesce(new.raw_
 create trigger auth_user_profile after insert on auth.users for each row execute function public.handle_new_user();
 create or replace function public.set_updated_at() returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end; $$;
 create trigger requests_updated_at before update on public.requests for each row execute function public.set_updated_at();
+create or replace function public.archive_completed_request() returns trigger language plpgsql as $$
+begin
+  if new.status = 'Selesai' then
+    new.completed_at=coalesce(new.completed_at,now());
+    new.archived_at=coalesce(new.archived_at,now());
+  else
+    new.archived_at=null;
+  end if;
+  return new;
+end; $$;
+create trigger requests_auto_archive_completed before insert or update of status on public.requests for each row execute function public.archive_completed_request();
