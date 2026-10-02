@@ -15,4 +15,4 @@ Setelah perubahan lokal siap dipublikasikan ke Vercel:
 npm run deploy
 ```
 
-Command deploy akan menjalankan build, lalu membuat production deployment dengan Vercel CLI. Pada penggunaan pertama, `npx vercel` akan meminta login dan menghubungkan folder project ke project Vercel. Pastikan environment variables Supabase sudah tersedia di project Vercel.
+Command deploy akan menjalankan build, lalu membuat production deployment ke project `elbro1/kmi-web` dengan Vercel CLI. Pastikan akun Vercel yang sedang aktif memiliki akses ke project tersebut dan environment variables Supabase sudah tersedia di project Vercel. Jika belum login, jalankan `npx vercel login` terlebih dahulu.
