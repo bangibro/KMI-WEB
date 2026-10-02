@@ -9,23 +9,12 @@ const media = value => value?.startsWith('/') ? API + value : value
 const notificationsKey = 'kmi_notifications'
 const authStorage = window.sessionStorage
 const formatDate = value => value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString('id-ID') : '-'
-const deviceNotificationsSupported = () => 'Notification' in window
-async function enableDeviceNotifications() {
-  if (!deviceNotificationsSupported()) throw Error('Browser ini belum mendukung notifikasi perangkat.')
-  const permission = await Notification.requestPermission()
-  if (permission !== 'granted') throw Error('Izin notifikasi belum diberikan. Aktifkan dari pengaturan browser.')
-}
-function sendDeviceNotification(message) {
-  if (!deviceNotificationsSupported() || Notification.permission !== 'granted') return
-  new Notification('WEB KMI', { body: message, tag: `kmi-${message}` })
-}
 function getNotifications() { try { return JSON.parse(localStorage.getItem(notificationsKey) || '[]') } catch { return [] } }
 function addNotification(message, audience = 'all', division = null) {
   const items = getNotifications()
   if (items.some(item => item.message === message && item.audience === audience && item.division === division)) return
   items.unshift({ id: `${Date.now()}-${Math.random()}`, message, audience, division, created_at: new Date().toISOString(), read: false })
   localStorage.setItem(notificationsKey, JSON.stringify(items.slice(0, 50)))
-  sendDeviceNotification(message)
 }
 async function api(url, options = {}) {
   const token = authStorage.getItem('admin_token')
@@ -280,7 +269,7 @@ function ConfirmModal({ confirmation, onCancel, onConfirm }) {
 }
 function Toast({ message, type = 'success', onClose }) { return <div className={`toast ${type === 'error' ? 'toast-error' : ''}`} role="status"><span className="toast-icon">{type === 'error' ? '!' : '✓'}</span><span>{message}</span><button type="button" aria-label="Tutup notifikasi" onClick={onClose}>×</button></div> }
 function Field({ label, ...props }) { return <label className="field"><span>{label}</span><input {...props} /></label> }
-function Nav({ title, onBack, links, page, setPage, right, notificationCount = 0 }) { const [notificationMessage, setNotificationMessage] = useState(''); const openPage = async key => { if (key === 'notifications' && deviceNotificationsSupported()) { setNotificationMessage(''); if (Notification.permission === 'default') { try { await enableDeviceNotifications() } catch (error) { setNotificationMessage(error.message) } } else if (Notification.permission === 'denied') setNotificationMessage('Notifikasi diblokir. Buka pengaturan situs di browser, izinkan Notifikasi untuk WEB KMI, lalu muat ulang halaman.') } setPage(key) }; return <header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4"><button className="text-left" onClick={onBack}><p className="font-black text-orange-600">WEB KMI</p><p className="text-xs text-slate-500">{title}</p></button><nav className="flex items-center gap-2">{links.map(([key, label]) => <button key={key} className={page === key ? 'nav-link active' : 'nav-link'} onClick={() => openPage(key)}>{label}{key === 'notifications' && notificationCount > 0 && <span className="notification-count">{notificationCount > 9 ? '9+' : notificationCount}</span>}</button>)}{right}</nav></div>{notificationMessage && <p className="mx-auto max-w-7xl px-5 pb-3 text-xs text-red-600">{notificationMessage}</p>}</header> }
+function Nav({ title, onBack, links, page, setPage, right, notificationCount = 0 }) { return <header className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4"><button className="text-left" onClick={onBack}><p className="font-black text-orange-600">WEB KMI</p><p className="text-xs text-slate-500">{title}</p></button><nav className="flex items-center gap-2">{links.map(([key, label]) => <button key={key} className={page === key ? 'nav-link active' : 'nav-link'} onClick={() => setPage(key)}>{label}{key === 'notifications' && notificationCount > 0 && <span className="notification-count">{notificationCount > 9 ? '9+' : notificationCount}</span>}</button>)}{right}</nav></div></header> }
 function DivisionPassword({ division, onSuccess, onBack }) {
   const [password, setPassword] = useState(''), [error, setError] = useState(''), [loading, setLoading] = useState(false)
   return <main className="min-h-screen bg-slate-950 px-5 py-10"><form className="panel mx-auto mt-16 max-w-md" onSubmit={async event => { event.preventDefault(); setLoading(true); setError(''); try { await api(`/api/public/divisions/${division.id}/access`, { method: 'POST', body: JSON.stringify({ password }) }); onSuccess() } catch (e) { setError(e.message) } finally { setLoading(false) } }}><button type="button" className="mb-8 text-sm text-slate-500" onClick={onBack}>← Pilih bidang lain</button><p className="eyebrow">Akses bidang</p><h1 className="page-title">{division.name}</h1><p className="muted">Masukkan password bidang untuk membuka request dan progress.</p><div className="mt-7 grid gap-4"><Field label="Password Bidang" type="password" required autoFocus value={password} onChange={e => setPassword(e.target.value)} />{error && <p className="text-sm text-red-600">{error}</p>}<button className="btn">{loading ? 'Memeriksa...' : 'Masuk ke Halaman Request'}</button></div></form></main>
